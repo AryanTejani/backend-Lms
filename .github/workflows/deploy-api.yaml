@@ -1,0 +1,38 @@
+name: API Build and Deploy
+run-name: Release of API-${{ inputs.environment }} ${{ inputs.aws_region }}  | ${{ github.event.repository.updated_at }}
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - production
+        default: 'dev'
+      aws_region:
+        description: 'AWS region'
+        required: true
+        type: choice
+        options:
+          - us-east-2
+        default: 'us-east-2'
+permissions:
+  id-token: write
+  packages: read
+  contents: read
+jobs:
+  build-scan-deploy:
+    if: github.ref_name == github.event.inputs.environment
+    uses: deepvue-app/github-actions/.github/workflows/reuse-nodejs-tl-deploy.yaml@main
+    with:
+      AWS_ROLE: ${{ vars[format('AWS_ROLE_{0}', github.event.inputs.environment)] }}
+      aws_region: ${{ github.event.inputs.aws_region }}
+      service: "api"
+      environment: ${{ github.event.inputs.environment }}
+      ENV: ${{ vars[format('env_{0}', github.event.inputs.environment)] }}
+      ES_HOST: ${{ vars[format('es_host_{0}', github.event.inputs.environment)] }}
+    secrets:
+      discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}

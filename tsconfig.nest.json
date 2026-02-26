@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // NestJS requires these
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+
+    // Output directory
+    "outDir": "./dist",
+
+    // NestJS works better with these settings
+    "strictPropertyInitialization": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

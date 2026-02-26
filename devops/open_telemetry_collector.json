@@ -1,0 +1,22 @@
+{
+    "name": "aws-otel-collector",
+    "image": "public.ecr.aws/aws-observability/aws-otel-collector:v0.30.0",
+    "cpu": 0,
+    "portMappings": [],
+    "essential": true,
+    "environment": [
+        {
+            "name": "AOT_CONFIG_CONTENT",
+            "value": "extensions:\n  health_check:\n  sigv4auth:\n    region: \"us-east-2\"\n    service: \"aps\"\n    assume_role:\n      arn: \"arn:aws:iam::503706188161:role/traderlion-amp-remote-write-role\"\nreceivers:\n  awsecscontainermetrics:\n    collection_interval: 20s\nprocessors:\n  filter:\n    metrics:\n      include:\n        match_type: strict\n        metric_names:\n          - ecs.task.memory.utilized\n          - ecs.task.cpu.utilized\nexporters:\n  prometheusremotewrite:\n    endpoint: \"https://aps-workspaces.us-east-2.amazonaws.com/workspaces/ws-f2cdd8d3-8fb8-45ce-b6a7-c817e00282d8/api/v1/remote_write\"\n    auth:\n      authenticator: sigv4auth\nservice:\n  extensions: [health_check, sigv4auth]\n  pipelines:\n    metrics:\n      receivers: [awsecscontainermetrics]\n      processors: [filter]\n      exporters: [prometheusremotewrite]"
+        }
+    ],
+    "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+            "awslogs-create-group": "True",
+            "awslogs-group": "/ecs/ecs-aws-otel-sidecar-collector",
+            "awslogs-region": "us-east-2",
+            "awslogs-stream-prefix": "ecs"
+        }
+    }
+}

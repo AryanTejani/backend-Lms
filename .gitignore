@@ -1,0 +1,9 @@
+node_modules
+.env
+dist
+migrate-config.cjs
+
+# Prisma (we use node-pg-migrate for migrations)
+prisma/migrations/
+
+/src/generated/prisma

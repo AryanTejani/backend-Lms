@@ -1,0 +1,24 @@
+{
+    "name": "log_router",
+    "image": "906394416424.dkr.ecr.us-east-1.amazonaws.com/aws-for-fluent-bit:stable",
+    "cpu": 0,
+    "memoryReservation": 50,
+    "portMappings": [],
+    "essential": true,
+    "environment": [],
+    "mountPoints": [],
+    "volumesFrom": [],
+    "user": "0",
+    "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+            "awslogs-create-group": "true",
+            "awslogs-group": "firelens-container",
+            "awslogs-region": "us-east-2",
+            "awslogs-stream-prefix": "firelens"
+        }
+    },
+    "firelensConfiguration": {
+        "type": "fluentbit"
+    }
+}
