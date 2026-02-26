@@ -44,7 +44,7 @@ async function bootstrap(): Promise<void> {
     // Global exception filter
     app.useGlobalFilters(new AuthExceptionFilter(logger));
 
-    const port = configService.get<number>('server.port') ?? 5001;
+    const port = configService.get<number>('server.port') ?? 5003;
 
     await app.listen(port);
 
