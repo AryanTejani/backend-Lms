@@ -71,7 +71,7 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(CacheService.name);
   private redis!: Redis;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) { }
 
   async onModuleInit(): Promise<void> {
     const redisUrl = this.configService.get<string>('redis.url') ?? 'redis://localhost:6379';
@@ -205,8 +205,16 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   async consumeOAuthState(state: string): Promise<OAuthState | null> {
     const key = `${OAUTH_STATE_PREFIX}${state}`;
 
-    // Atomic get-and-delete (GETDEL)
-    const value = await this.redis.getdel(key);
+    // Atomic get-and-delete (GETDEL) compatibility for Redis < 6.2
+    const luaScript = `
+      local val = redis.call('GET', KEYS[1])
+      if val then
+        redis.call('DEL', KEYS[1])
+      end
+      return val
+    `;
+
+    const value = (await this.redis.eval(luaScript, 1, key)) as string | null;
 
     if (value === null) {
       return null;
