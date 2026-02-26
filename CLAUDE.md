@@ -131,7 +131,6 @@ Defined in `tsconfig.json`, used everywhere:
 - Prettier: singleQuote, trailingComma all, semi, printWidth 150, tabWidth 2
 - ESLint: explicit-function-return-type required, unused-imports enforced, no-param-reassign
 - Blank lines required before/after control flow statements (if, for, while, try, etc.)
-- Pre-commit hooks: husky + lint-staged (prettier + eslint on staged .ts files)
 
 ## Gotchas
 

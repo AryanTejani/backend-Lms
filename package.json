@@ -23,18 +23,9 @@
     "migrate:create": "node-pg-migrate create -m migrations",
     "lint": "eslint apps/ libs/",
     "lint:fix": "eslint apps/ libs/ --fix",
-    "format": "prettier --write \"{apps,libs}/**/*.ts\"",
-    "format:check": "prettier --check \"{apps,libs}/**/*.ts\"",
     "typecheck": "tsc --noEmit -p apps/main-panel/tsconfig.app.json && tsc --noEmit -p apps/admin-panel/tsconfig.app.json && tsc --noEmit -p apps/mobile-api/tsconfig.app.json",
     "seed:admin": "ts-node -r tsconfig-paths/register scripts/seed-admin.ts",
-    "seed:plans": "ts-node -r tsconfig-paths/register scripts/seed-subscription-plans.ts",
-    "prepare": "husky"
-  },
-  "lint-staged": {
-    "{apps,libs}/**/*.ts": [
-      "prettier --write",
-      "eslint --fix"
-    ]
+    "seed:plans": "ts-node -r tsconfig-paths/register scripts/seed-subscription-plans.ts"
   },
   "repository": {
     "type": "git",
@@ -63,10 +54,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-unused-imports": "^4.3.0",
     "globals": "^17.1.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
     "nodemon": "^3.1.11",
-    "prettier": "^3.8.1",
     "prisma": "^7.3.0",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.10",
