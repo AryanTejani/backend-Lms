@@ -5,7 +5,7 @@ export const createSubscriptionPlanSchema = z.object({
   slug: z.string().max(255).optional(),
   description: z.string().max(5000).optional(),
   amount_cents: z.number().int().min(0, 'Amount must be non-negative'),
-  currency: z.string().length(3).default('usd').optional(),
+  currency: z.string().length(3).default('inr').optional(),
   recurring_interval: z.enum(['day', 'week', 'month', 'year']),
   recurring_interval_count: z.number().int().min(1).default(1).optional(),
   trial_days: z.number().int().min(0).default(0).optional(),

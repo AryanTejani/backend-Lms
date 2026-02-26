@@ -117,7 +117,7 @@ export class SubscriptionPlanRepository {
         slug: data.slug ?? null,
         description: data.description ?? null,
         amountCents: BigInt(data.amount_cents),
-        currency: data.currency ?? 'usd',
+        currency: data.currency ?? 'inr',
         recurringInterval: data.recurring_interval,
         recurringIntervalCount: data.recurring_interval_count ?? 1,
         trialDays: data.trial_days ?? 0,

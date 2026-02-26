@@ -303,7 +303,7 @@ model Product {
   productSlug              String?             @map("product_slug") @db.VarChar(255)
   productDescription       String?             @map("product_description") @db.Text
   amountCents              BigInt              @default(0) @map("amount_cents")
-  currency                 String              @default("usd") @db.VarChar(3)
+  currency                 String              @default("inr") @db.VarChar(3)
   isRecurring              Boolean             @default(false) @map("is_recurring")
   recurringInterval        String?             @map("recurring_interval") @db.VarChar(20)
   recurringIntervalCount   Int                 @default(1) @map("recurring_interval_count")
@@ -390,7 +390,7 @@ model SubscriptionPlan {
   slug                   String?                  @unique @db.VarChar(255)
   description            String?                  @db.Text
   amountCents            BigInt                   @map("amount_cents")
-  currency               String                   @default("usd") @db.VarChar(3)
+  currency               String                   @default("inr") @db.VarChar(3)
   recurringInterval      String                   @map("recurring_interval") @db.VarChar(20)
   recurringIntervalCount Int                      @default(1) @map("recurring_interval_count")
   trialDays              Int                      @default(0) @map("trial_days")

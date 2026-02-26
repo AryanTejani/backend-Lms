@@ -260,7 +260,7 @@ export class WebhookService {
       const createdOrder = await this.orderRepository.create({
         customerId: customer.id,
         orderType: 'SUBSCRIPTION',
-        currency: invoice.currency ?? 'usd',
+        currency: invoice.currency ?? 'inr',
         subtotalCents: BigInt(invoice.subtotal ?? 0),
         discountCents: BigInt(invoice.total_discount_amounts?.reduce((sum: number, d: { amount: number }) => sum + d.amount, 0) ?? 0),
         taxCents: BigInt(totalTaxCents),
@@ -392,7 +392,7 @@ export class WebhookService {
       const createdOrder = await this.orderRepository.create({
         customerId,
         orderType: 'CHECKOUT',
-        currency: session.currency ?? 'usd',
+        currency: session.currency ?? 'inr',
         subtotalCents: BigInt(amountTotal),
         discountCents: BigInt(0),
         taxCents: BigInt(0),
@@ -413,7 +413,7 @@ export class WebhookService {
         discountCents: BigInt(0),
         taxCents: BigInt(0),
         totalCents: BigInt(amountTotal),
-        currency: session.currency ?? 'usd',
+        currency: session.currency ?? 'inr',
       });
 
       // Create Purchase (lifetime)
@@ -424,7 +424,7 @@ export class WebhookService {
           productId,
           orderId: createdOrder.id,
           unitAmountCents: BigInt(amountTotal),
-          currency: session.currency ?? 'usd',
+          currency: session.currency ?? 'inr',
           status: 'ACTIVE',
           isLifetime: true,
         },

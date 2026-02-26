@@ -48,7 +48,7 @@ export class SubscriptionPlanService {
       const price = await this.stripeService.createPrice({
         productId: product.id,
         unitAmount: data.amount_cents,
-        currency: data.currency ?? 'usd',
+        currency: data.currency ?? 'inr',
         recurringInterval: data.recurring_interval as Stripe.PriceCreateParams.Recurring.Interval,
         ...(data.recurring_interval_count !== undefined && { recurringIntervalCount: data.recurring_interval_count }),
       });
