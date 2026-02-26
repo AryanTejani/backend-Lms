@@ -124,7 +124,13 @@ CREATE TABLE customers (
   is_live_mode          boolean      NOT NULL DEFAULT true,
   created_at            timestamptz  NOT NULL DEFAULT NOW(),
   updated_at            timestamptz  NOT NULL DEFAULT NOW(),
-  deleted_at            timestamptz
+  deleted_at            timestamptz,
+  language_preference   varchar(10)  NOT NULL DEFAULT 'en',
+  age                   smallint,
+  grade                 varchar(20),
+  subjects              jsonb        NOT NULL DEFAULT '[]',
+  learning_goals        jsonb        NOT NULL DEFAULT '[]',
+  onboarding_completed  boolean      NOT NULL DEFAULT false
 );
 CREATE INDEX idx_customers_email ON customers (email);
 
@@ -711,7 +717,8 @@ INSERT INTO pgmigrations (name, run_on) VALUES
   ('1771850000000_create-topics-table',                       NOW()),
   ('1771934828911_add-stripe-ids-to-products',                NOW()),
   ('1772023274136_fix-migrated-video-types',                  NOW()),
-  ('1772040267570_add-soft-delete-to-lessons-quizzes',        NOW());
+  ('1772040267570_add-soft-delete-to-lessons-quizzes',        NOW()),
+  ('1772100000000_add-onboarding-fields-to-customers',       NOW());
 
 -- ---------------------------------------------------------------------------
 -- SECTION 5: VidyaSetu Dummy Data

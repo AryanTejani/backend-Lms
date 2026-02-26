@@ -160,6 +160,8 @@ export class OAuthAccountRepository {
     lastName: string | null;
     stripeCustomerId: string | null;
     requiresPasswordReset: boolean;
+    languagePreference: string;
+    onboardingCompleted: boolean;
     createdAt: Date;
     updatedAt: Date;
   }): Customer {
@@ -171,6 +173,8 @@ export class OAuthAccountRepository {
       last_name: customer.lastName,
       stripe_customer_id: customer.stripeCustomerId,
       requires_password_reset: customer.requiresPasswordReset,
+      language_preference: customer.languagePreference,
+      onboarding_completed: customer.onboardingCompleted,
       created_at: customer.createdAt,
       updated_at: customer.updatedAt,
     };

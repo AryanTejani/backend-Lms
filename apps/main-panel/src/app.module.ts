@@ -10,6 +10,7 @@ import { HealthModule } from './modules/health/health.module';
 import { VideosModule } from './modules/videos/videos.module';
 import { CoursesModule } from './modules/courses/courses.module';
 import { CheckoutModule } from './modules/checkout/checkout.module';
+import { OnboardingModule } from './modules/onboarding/onboarding.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { CheckoutModule } from './modules/checkout/checkout.module';
     VideosModule,
     CoursesModule,
     CheckoutModule,
+    OnboardingModule,
   ],
 })
 export class MainPanelAppModule {}

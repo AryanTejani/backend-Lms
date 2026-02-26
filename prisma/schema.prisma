@@ -178,6 +178,12 @@ model Customer {
   createdAt             DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt             DateTime            @default(now()) @map("updated_at") @db.Timestamptz(6)
   deletedAt             DateTime?           @map("deleted_at") @db.Timestamptz(6)
+  languagePreference    String              @default("en") @map("language_preference") @db.VarChar(10)
+  age                   Int?                @db.SmallInt
+  grade                 String?             @db.VarChar(20)
+  subjects              Json                @default("[]")
+  learningGoals         Json                @default("[]") @map("learning_goals")
+  onboardingCompleted   Boolean             @default(false) @map("onboarding_completed")
 
   // Relations
   oauthAccounts        OAuthAccount[]

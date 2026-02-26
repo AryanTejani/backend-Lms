@@ -26,6 +26,8 @@ export interface AuthenticatedUser {
   email: string;
   first_name: string | null;
   last_name: string | null;
+  language_preference: string;
+  onboarding_completed: boolean;
 }
 
 export interface OAuthState {

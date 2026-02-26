@@ -116,6 +116,36 @@ export class CustomerRepository {
     });
   }
 
+  async saveOnboarding(
+    customerId: string,
+    data: {
+      languagePreference: string;
+      age: number | null;
+      grade: string | null;
+      subjects: string[];
+      learningGoals: string[];
+    },
+  ): Promise<void> {
+    await this.prisma.customer.update({
+      where: { id: customerId },
+      data: {
+        languagePreference: data.languagePreference,
+        age: data.age,
+        grade: data.grade,
+        subjects: data.subjects,
+        learningGoals: data.learningGoals,
+        onboardingCompleted: true,
+      },
+    });
+  }
+
+  async updateLanguagePreference(customerId: string, languagePreference: string): Promise<void> {
+    await this.prisma.customer.update({
+      where: { id: customerId },
+      data: { languagePreference },
+    });
+  }
+
   private mapToCustomer(customer: {
     id: string;
     email: string;
@@ -124,6 +154,8 @@ export class CustomerRepository {
     lastName: string | null;
     stripeCustomerId: string | null;
     requiresPasswordReset: boolean;
+    languagePreference: string;
+    onboardingCompleted: boolean;
     createdAt: Date;
     updatedAt: Date;
   }): Customer {
@@ -135,6 +167,8 @@ export class CustomerRepository {
       last_name: customer.lastName,
       stripe_customer_id: customer.stripeCustomerId,
       requires_password_reset: customer.requiresPasswordReset,
+      language_preference: customer.languagePreference,
+      onboarding_completed: customer.onboardingCompleted,
       created_at: customer.createdAt,
       updated_at: customer.updatedAt,
     };

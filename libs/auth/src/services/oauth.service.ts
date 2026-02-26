@@ -122,6 +122,8 @@ export class OAuthService {
         email: customer.email,
         first_name: customer.first_name,
         last_name: customer.last_name,
+        language_preference: customer.language_preference,
+        onboarding_completed: customer.onboarding_completed,
       },
       session,
       isNewUser: isNewCustomer,

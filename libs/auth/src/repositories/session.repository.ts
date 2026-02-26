@@ -45,6 +45,8 @@ export class SessionRepository {
         customer_last_name: string | null;
         customer_stripe_customer_id: string | null;
         customer_requires_password_reset: boolean;
+        customer_language_preference: string;
+        customer_onboarding_completed: boolean;
         customer_created_at: Date;
         customer_updated_at: Date;
       }>
@@ -54,6 +56,8 @@ export class SessionRepository {
              c.first_name as customer_first_name, c.last_name as customer_last_name,
              c.stripe_customer_id as customer_stripe_customer_id,
              c.requires_password_reset as customer_requires_password_reset,
+             c.language_preference as customer_language_preference,
+             c.onboarding_completed as customer_onboarding_completed,
              c.created_at as customer_created_at, c.updated_at as customer_updated_at
       FROM sessions s
       JOIN customers c ON s.customer_id = c.id
@@ -79,6 +83,8 @@ export class SessionRepository {
         last_name: row.customer_last_name,
         stripe_customer_id: row.customer_stripe_customer_id,
         requires_password_reset: row.customer_requires_password_reset,
+        language_preference: row.customer_language_preference,
+        onboarding_completed: row.customer_onboarding_completed,
         created_at: row.customer_created_at,
         updated_at: row.customer_updated_at,
       },

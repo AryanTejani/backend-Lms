@@ -9,6 +9,8 @@ export interface AuthenticatedUser {
   email: string;
   first_name: string | null;
   last_name: string | null;
+  language_preference: string;
+  onboarding_completed: boolean;
 }
 
 /**
@@ -23,7 +25,7 @@ export interface AuthenticatedUser {
  * }
  */
 export const CurrentUser = createParamDecorator(
-  (data: keyof AuthenticatedUser | undefined, ctx: ExecutionContext): AuthenticatedUser | string | null | undefined => {
+  (data: keyof AuthenticatedUser | undefined, ctx: ExecutionContext): AuthenticatedUser | string | boolean | null | undefined => {
     const request = ctx.switchToHttp().getRequest<Request>();
     const user = request.user as AuthenticatedUser | undefined;
 

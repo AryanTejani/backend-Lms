@@ -12,6 +12,8 @@ export interface Customer {
   last_name: string | null;
   stripe_customer_id: string | null;
   requires_password_reset: boolean;
+  language_preference: string;
+  onboarding_completed: boolean;
   created_at: Date;
   updated_at: Date;
 }
@@ -53,6 +55,8 @@ export interface AuthenticatedUser {
   email: string;
   first_name: string | null;
   last_name: string | null;
+  language_preference: string;
+  onboarding_completed: boolean;
 }
 
 export interface AuthResponse {
@@ -106,6 +110,8 @@ export interface SessionCustomer {
   last_name: string | null;
   stripe_customer_id: string | null;
   requires_password_reset: boolean;
+  language_preference: string;
+  onboarding_completed: boolean;
   created_at: Date;
   updated_at: Date;
 }
