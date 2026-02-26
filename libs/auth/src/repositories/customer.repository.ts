@@ -10,7 +10,7 @@ import { Customer } from '../types/auth.types';
  */
 @Injectable()
 export class CustomerRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async findByEmail(email: string): Promise<Customer | null> {
     const customer = await this.prisma.customer.findUnique({
@@ -144,6 +144,14 @@ export class CustomerRepository {
       where: { id: customerId },
       data: { languagePreference },
     });
+  }
+
+  async update(customerId: string, data: Prisma.CustomerUpdateInput): Promise<Customer> {
+    const customer = await this.prisma.customer.update({
+      where: { id: customerId },
+      data,
+    });
+    return this.mapToCustomer(customer);
   }
 
   private mapToCustomer(customer: {
