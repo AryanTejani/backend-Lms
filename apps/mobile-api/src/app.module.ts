@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
+import { ContentModule } from '@app/content';
+import { CustomerModule } from '@app/customer';
 import { ConfigModule } from '@nestjs/config';
 import { configuration } from './config/configuration';
 import { DatabaseModule, PrismaModule, CacheModule, EmailModule, LoggerModule } from '@app/shared';
 import { AuthDomainModule } from '@app/auth';
 import { HealthModule } from './modules/health/health.module';
+import { MobileAuthHttpModule } from './modules/auth/mobile-auth.module';
+import { MobileContentHttpModule } from './modules/content/mobile-content.module';
 
 @Module({
   imports: [
@@ -24,12 +28,13 @@ import { HealthModule } from './modules/health/health.module';
 
     // Domain service libs
     AuthDomainModule,
+    ContentModule,
+    CustomerModule,
 
     // App-specific HTTP modules
     HealthModule,
-
-    // TODO: Add as implemented:
-    // MobileAuthHttpModule,
+    MobileAuthHttpModule,
+    MobileContentHttpModule,
   ],
 })
-export class MobileApiAppModule {}
+export class MobileApiAppModule { }
