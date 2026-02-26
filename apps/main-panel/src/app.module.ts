@@ -11,6 +11,7 @@ import { VideosModule } from './modules/videos/videos.module';
 import { CoursesModule } from './modules/courses/courses.module';
 import { CheckoutModule } from './modules/checkout/checkout.module';
 import { OnboardingModule } from './modules/onboarding/onboarding.module';
+import { AssistantModule } from './modules/assistant/assistant.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { OnboardingModule } from './modules/onboarding/onboarding.module';
     CoursesModule,
     CheckoutModule,
     OnboardingModule,
+    AssistantModule,
   ],
 })
 export class MainPanelAppModule {}

@@ -13,6 +13,7 @@ interface MainPanelConfigShape extends SharedConfigShape {
   cookies: { secure: boolean; sameSite: 'lax' | 'strict' | 'none'; domain: string | undefined; httpOnly: boolean };
   cors: { origin: string };
   frontend: { url: string };
+  gemini: { apiKey: string };
 }
 
 export const configuration = (): MainPanelConfigShape => ({
@@ -46,6 +47,9 @@ export const configuration = (): MainPanelConfigShape => ({
   },
   frontend: {
     url: process.env.FRONTEND_URL || 'http://localhost:3001',
+  },
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY ?? '',
   },
 });
 

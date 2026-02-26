@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+import { json, urlencoded } from 'express';
 import { MainPanelAppModule } from './app.module';
 import { AuthExceptionFilter } from '@app/shared/filters/auth-exception.filter';
 import { LoggerService } from '@app/shared/logger/logger.service';
@@ -23,6 +24,10 @@ async function bootstrap(): Promise<void> {
     app.useLogger(logger);
 
     const configService = app.get(ConfigService);
+
+    // Body parser limits (must be before other middleware to support image uploads)
+    app.use(json({ limit: '10mb' }));
+    app.use(urlencoded({ extended: true, limit: '10mb' }));
 
     // Security headers
     app.use(helmet());

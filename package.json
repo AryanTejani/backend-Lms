@@ -64,6 +64,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.750.0",
+    "@google/genai": "^1.43.0",
     "@nestjs/common": "^11.1.12",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.12",
