@@ -41,7 +41,7 @@ async function bootstrap(): Promise<void> {
 
     const port = configService.get<number>('server.port') ?? 5002;
 
-    await app.listen(port);
+    await app.listen(port, '0.0.0.0');
 
     logger.log(`mobile-api server running on port ${port}`, 'Bootstrap');
   } catch (error) {

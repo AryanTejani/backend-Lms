@@ -8,6 +8,7 @@ import { AuthDomainModule } from '@app/auth';
 import { HealthModule } from './modules/health/health.module';
 import { MobileAuthHttpModule } from './modules/auth/mobile-auth.module';
 import { MobileContentHttpModule } from './modules/content/mobile-content.module';
+import { MobileBillingHttpModule } from './modules/billing/mobile-billing.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { MobileContentHttpModule } from './modules/content/mobile-content.module
     HealthModule,
     MobileAuthHttpModule,
     MobileContentHttpModule,
+    MobileBillingHttpModule,
   ],
 })
 export class MobileApiAppModule { }
