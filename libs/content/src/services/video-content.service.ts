@@ -23,10 +23,10 @@ export class VideoContentService {
       title: string;
       description?: string | undefined;
       categoryId?: string | undefined;
+      libraryType?: BunnyStreamLibrary | undefined;
     },
   ): Promise<VideoRecord> {
-    // All new videos go to private library (access controlled at course level)
-    const libraryType: BunnyStreamLibrary = 'private';
+    const libraryType: BunnyStreamLibrary = input.libraryType ?? 'private';
 
     // Create video in Bunny CDN first
     const bunnyVideo = await this.videoService.createVideo({ title: input.title }, libraryType);
@@ -105,6 +105,38 @@ return 'processing';
       categoryId: params.categoryId,
       isPublished: params.isPublished,
     });
+
+    // Sync processing status from Bunny for videos still encoding
+    const processingVideos = result.data.filter((v) => v.video_status === 'processing');
+
+    if (processingVideos.length > 0) {
+      const statusResults = await Promise.allSettled(
+        processingVideos.map(async (video) => {
+          const bunnyVideo = await this.videoService.getVideo(video.bunny_video_id, video.bunny_library_type as BunnyStreamLibrary);
+          const newStatus = this.mapBunnyStatus(bunnyVideo.status, bunnyVideo.encodeProgress);
+
+          if (newStatus !== video.video_status || bunnyVideo.encodeProgress !== video.encode_progress) {
+            await this.videoRepository.updateStatus(video.id, newStatus, bunnyVideo.encodeProgress);
+            video.video_status = newStatus;
+            video.encode_progress = bunnyVideo.encodeProgress;
+          }
+
+          if (bunnyVideo.length > 0 && bunnyVideo.length !== video.duration) {
+            await this.videoRepository.update(video.id, { duration: bunnyVideo.length });
+            video.duration = bunnyVideo.length;
+          }
+
+          return video;
+        }),
+      );
+
+      // Log failures but don't block
+      for (const r of statusResults) {
+        if (r.status === 'rejected') {
+          // Bunny API failure for one video shouldn't affect others
+        }
+      }
+    }
 
     return { ...result, page: params.page, limit: params.limit };
   }

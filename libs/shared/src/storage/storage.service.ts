@@ -1,15 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
+import { Readable } from 'node:stream';
 import { generateUuidV7 } from '../utils/uuid.util';
 
 export type BunnyStorageZone = 'public' | 'private';
-
-interface ZoneConfig {
-  apiKey: string;
-  zone: string;
-  endpoint: string;
-  cdnBaseUrl: string;
-}
 
 interface UploadParams {
   folder: string;
@@ -25,85 +20,57 @@ interface UploadResult {
 @Injectable()
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
-  private readonly configs: Record<BunnyStorageZone, ZoneConfig>;
 
   constructor(private readonly configService: ConfigService) {
-    this.configs = {
-      public: {
-        apiKey: this.configService.get<string>('bunny.storagePublicApiKey') ?? '',
-        zone: this.configService.get<string>('bunny.storagePublicZone') ?? 'traderlion-media',
-        endpoint: this.configService.get<string>('bunny.storagePublicEndpoint') ?? 'https://ny.storage.bunnycdn.com',
-        cdnBaseUrl: this.configService.get<string>('bunny.storagePublicCdnBaseUrl') ?? 'https://vz-a9f12ba5-5bf.b-cdn.net',
-      },
-      private: {
-        apiKey: this.configService.get<string>('bunny.storagePrivateApiKey') ?? '',
-        zone: this.configService.get<string>('bunny.storagePrivateZone') ?? '',
-        endpoint: this.configService.get<string>('bunny.storagePrivateEndpoint') ?? 'https://ny.storage.bunnycdn.com',
-        cdnBaseUrl: this.configService.get<string>('bunny.storagePrivateCdnBaseUrl') ?? '',
-      },
-    };
+    cloudinary.config({
+      cloud_name: this.configService.get<string>('cloudinary.cloudName') ?? '',
+      api_key: this.configService.get<string>('cloudinary.apiKey') ?? '',
+      api_secret: this.configService.get<string>('cloudinary.apiSecret') ?? '',
+    });
   }
 
-  private getConfig(zone: BunnyStorageZone): ZoneConfig {
-    return this.configs[zone];
-  }
-
-  /**
-   * Upload a file to Bunny CDN Storage.
-   *
-   * The file is stored at `{folder}/{year}/{month}/{uuidv7}.{ext}`.
-   */
-  async upload({ folder, fileName, contentType, buffer }: UploadParams, zone: BunnyStorageZone = 'public'): Promise<UploadResult> {
-    const config = this.getConfig(zone);
+  async upload({ folder, fileName, buffer }: UploadParams, _zone: BunnyStorageZone = 'public'): Promise<UploadResult> {
     const ext = this.extractExtension(fileName);
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const uniqueName = `${generateUuidV7()}${ext}`;
-    const storagePath = `${folder}/${year}/${month}/${uniqueName}`;
+    const cloudinaryFolder = `${folder}/${year}/${month}`;
 
-    const url = `${config.endpoint}/${config.zone}/${storagePath}`;
+    const result = await new Promise<UploadApiResponse>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: cloudinaryFolder,
+          public_id: uniqueName.replace(/\.[^.]+$/, ''),
+          resource_type: 'auto',
+        },
+        (error, result) => {
+          if (error) {
+            reject(error);
 
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        AccessKey: config.apiKey,
-        'Content-Type': contentType,
-      },
-      body: buffer,
+            return;
+          }
+
+          resolve(result!);
+        },
+      );
+
+      const readable = Readable.from(buffer);
+
+      readable.pipe(uploadStream);
     });
 
-    if (!response.ok) {
-      const body = await response.text();
+    this.logger.log(`Uploaded ${cloudinaryFolder}/${uniqueName} (${buffer.length} bytes) to Cloudinary`);
 
-      this.logger.error(`Bunny upload failed: ${response.status} — ${body}`);
-      throw new Error(`Failed to upload to Bunny CDN: ${response.status}`);
-    }
-
-    const cdnUrl = `${config.cdnBaseUrl}/${storagePath}`;
-
-    this.logger.log(`Uploaded ${storagePath} (${buffer.length} bytes) to ${zone} zone`);
-
-    return { cdnUrl };
+    return { cdnUrl: result.secure_url };
   }
 
-  /**
-   * Delete a file from Bunny CDN Storage.
-   */
-  async delete(storagePath: string, zone: BunnyStorageZone = 'public'): Promise<void> {
-    const config = this.getConfig(zone);
-    const url = `${config.endpoint}/${config.zone}/${storagePath}`;
-
-    const response = await fetch(url, {
-      method: 'DELETE',
-      headers: { AccessKey: config.apiKey },
-    });
-
-    if (!response.ok && response.status !== 404) {
-      const body = await response.text();
-
-      this.logger.error(`Bunny delete failed: ${response.status} — ${body}`);
-      throw new Error(`Failed to delete from Bunny CDN: ${response.status}`);
+  async delete(storagePath: string, _zone: BunnyStorageZone = 'public'): Promise<void> {
+    try {
+      await cloudinary.uploader.destroy(storagePath);
+    } catch (error) {
+      this.logger.error(`Cloudinary delete failed for ${storagePath}: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
     }
   }
 

@@ -341,11 +341,14 @@ export class VideoService {
     const query = searchParams.toString();
     const url = `${this.baseUrl}/library/${config.libraryId}/videos/${videoId}${query ? `?${query}` : ''}`;
 
+    this.logger.log(`Uploading to Bunny: videoId=${videoId}, size=${buffer.length}, library=${library}`);
+
     const response = await fetch(url, {
       method: 'PUT',
       headers: {
         AccessKey: config.apiKey,
         'Content-Type': 'application/octet-stream',
+        'Content-Length': String(buffer.length),
       },
       body: buffer,
     });
@@ -356,6 +359,8 @@ export class VideoService {
       this.logger.error(`Bunny Stream upload failed: ${response.status} — ${text}`);
       throw new Error(`Failed to upload video to Bunny Stream: ${response.status}`);
     }
+
+    this.logger.log(`Bunny upload response: ${response.status}`);
 
     return (await response.json()) as BunnyStatusResponse;
   }

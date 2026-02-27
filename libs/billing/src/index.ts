@@ -6,6 +6,8 @@ export { CheckoutService } from './services/checkout.service';
 export { WebhookService } from './services/webhook.service';
 export { CourseStripeSyncService } from './services/course-stripe-sync.service';
 export { RefundService } from './services/refund.service';
+export { SubscriptionRepository } from './repositories/subscription.repository';
+export { SubscriptionPlanRepository } from './repositories/subscription-plan.repository';
 export type { ProductRecord } from './repositories/product.repository';
 export type {
   SubscriptionPlanRecord,

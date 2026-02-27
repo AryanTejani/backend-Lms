@@ -1,10 +1,59 @@
-# VidyaSetu Backend LMS — Complete API Reference
+# VidyaSetu Backend — API Monorepo
 
-NestJS monorepo powering the entire VidyaSetu platform. Three apps share a common database (PostgreSQL) and Redis cache.
+The backend powering the **VidyaSetu** AI-powered multilingual learning platform for rural India (PS18 Track 4). A NestJS monorepo with three apps sharing a common PostgreSQL database and Redis cache.
 
 ---
 
-## 🏗 Ports & Apps
+## Prerequisites
+
+- **Node.js** 20+
+- **PostgreSQL** 15+
+- **Redis** 6+
+
+---
+
+## Tech Stack
+
+| Item | Detail |
+| :--- | :--- |
+| Framework | NestJS 11 + Express 5 |
+| Language | TypeScript 5.9 (strict) |
+| Database | PostgreSQL + Prisma 7 |
+| Migrations | node-pg-migrate |
+| Cache / Sessions | Redis (ioredis) |
+| Validation | Zod 4 |
+| Video Storage | Bunny CDN |
+| Email | AWS SES |
+| Payments | Stripe |
+| Auth | Cookie-based sessions + Google OAuth |
+
+---
+
+## Project Structure
+
+```
+apps/
+├── main-panel/            # Student-facing API (port 5000)
+├── admin-panel/           # Admin & instructor API (port 5001)
+└── mobile-api/            # Mobile app API (port 5002)
+
+libs/
+├── shared/                # DB, Prisma, Cache, Email, Storage, guards, pipes, utils
+├── auth/                  # Auth domain (JWT, sessions, OAuth)
+├── billing/               # Billing domain (Stripe, plans, checkout)
+├── content/               # Content domain (posts, categories, tags)
+└── customer/              # Customer domain (profiles, onboarding)
+
+prisma/
+└── schema.prisma          # Single schema (all models)
+
+migrations/                # node-pg-migrate .cjs files
+scripts/                   # Seed scripts
+```
+
+---
+
+## Ports & Apps
 
 | App | Port | Command | Purpose |
 | :--- | :--- | :--- | :--- |
@@ -14,11 +63,11 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 
 ---
 
-## 📱 Mobile API (Port 5002) — `/api/v1/*`
+## Mobile API (Port 5002) — `/api/v1/*`
 
 > Used **exclusively** by the Arise app via the BFF. All routes require `authorization: Bearer <token>` unless marked 🔓 Public.
 
-### 🔑 Auth — `/auth`
+### Auth — `/auth`
 
 | Method | Path | Auth | Description |
 | :--- | :--- | :--- | :--- |
@@ -27,7 +76,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `POST` | `/auth/logout` | 🔒 Session | Revoke current session |
 | `GET` | `/auth/me` | 🔒 Session | Get current authenticated user profile |
 
-### 👤 Customer — `/customer`
+### Customer — `/customer`
 
 | Method | Path | Auth | Description |
 | :--- | :--- | :--- | :--- |
@@ -36,7 +85,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `POST` | `/customer/onboarding` | 🔒 Session | Save onboarding data (language, age, grade, subjects, goals) |
 | `PATCH` | `/customer/preferences` | 🔒 Session | Update language preference only |
 
-### � Courses — `/courses`
+### Courses — `/courses`
 
 | Method | Path | Auth | Description |
 | :--- | :--- | :--- | :--- |
@@ -44,7 +93,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `GET` | `/courses/:slug` | 🔓 Optional | Get course detail with sections, lessons, purchase status |
 | `GET` | `/courses/:slug/lessons/:lessonId` | 🔓 Optional | Get lesson with video embed URL (gated if not purchased) |
 
-### 💳 Billing — `/billing`
+### Billing — `/billing`
 
 | Method | Path | Auth | Description |
 | :--- | :--- | :--- | :--- |
@@ -55,11 +104,11 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 
 ---
 
-## 🌐 Main Panel API (Port 5000) — Public Web Student Portal
+## Main Panel API (Port 5000) — Public Web Student Portal
 
-> Used by `frontend-Lms`. Auth via session cookie.
+> Used by the [frontend](../traderlion-platform-frontend/). Auth via session cookie.
 
-### 🔑 Auth — `/auth`
+### Auth — `/auth`
 
 | Method | Path | Auth | Description |
 | :--- | :--- | :--- | :--- |
@@ -72,7 +121,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `POST` | `/auth/forgot-password` | 🔓 Public | Send password reset email. Body: `{ email }` |
 | `POST` | `/auth/forgot-password/reset` | 🔓 Public | Reset password with token. Body: `{ token, password }` |
 
-### 📚 Courses — `/courses`
+### Courses — `/courses`
 
 | Method | Path | Auth | Description |
 | :--- | :--- | :--- | :--- |
@@ -83,20 +132,20 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `GET` | `/courses/:slug/quizzes` | 🔓 Optional | List all quizzes for a course |
 | `GET` | `/courses/:slug/quizzes/:quizId` | 🔓 Optional | Get quiz with questions and answer options |
 
-### 📹 Videos — `/videos`
+### Videos — `/videos`
 
 | Method | Path | Auth | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/videos` | 🔒 Session | List videos. Query: `?page&limit&category_id` |
 
-### 👤 Onboarding — `/customers/me`
+### Onboarding — `/customers/me`
 
 | Method | Path | Auth | Description |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/customers/me/onboarding` | 🔒 Session | Save onboarding data |
 | `PATCH` | `/customers/me/preferences` | 🔒 Session | Update language preference |
 
-### 💳 Billing — Root level
+### Billing — Root level
 
 | Method | Path | Auth | Description |
 | :--- | :--- | :--- | :--- |
@@ -109,15 +158,11 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 
 ---
 
-## 🛡 Admin Panel API (Port **5007**) — Admin & Instructor Management
+## Admin Panel API (Port 5001) — Admin & Instructor Management
 
-> Used by `admin-Lms` (frontend on port **3001**). All routes require `admin_session_id` cookie.
-> 
-> **CORS**: Set `ADMIN_CORS_ORIGIN=http://localhost:3001` in `.env`
-> 
-> **Default Admin:** `admin@vidyasetu.in` / `Admin@123456`
+> Used by the [admin panel](../traderlion-platform-admin/). All routes require `admin_session_id` cookie unless stated.
 
-### 🔑 Auth — `/auth`
+### Auth — `/auth`
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
@@ -125,7 +170,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `POST` | `/auth/logout` | Revoke admin session |
 | `GET` | `/auth/me` | Get current admin/instructor |
 
-### 👥 Admin Users — `/admin-users` *(Admin role only)*
+### Admin Users — `/admin-users` *(Admin role only)*
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
@@ -135,7 +180,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `POST` | `/admin-users/:id/deactivate` | Deactivate staff account (revokes all sessions) |
 | `POST` | `/admin-users/:id/activate` | Re-activate staff account |
 
-### 🎓 Courses — `/courses`
+### Courses — `/courses`
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
@@ -147,7 +192,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `POST` | `/courses/:id/publish` | Publish course (also syncs to Stripe if paid) |
 | `POST` | `/courses/:id/unpublish` | Unpublish course |
 
-### � Sections — `/courses/:productId/sections`
+### Sections — `/courses/:productId/sections`
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
@@ -158,7 +203,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `DELETE` | `/courses/:productId/sections/:id` | Remove a section |
 | `PUT` | `/courses/:productId/sections/reorder` | Reorder sections. Body: `{ section_ids: string[] }` |
 
-### 📄 Lessons — `/courses/:productId/lessons`
+### Lessons — `/courses/:productId/lessons`
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
@@ -169,7 +214,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `DELETE` | `/courses/:productId/lessons/:id` | Soft-delete a lesson |
 | `PUT` | `/courses/:productId/lessons/reorder` | Reorder lessons. Body: `{ lesson_ids: string[] }` |
 
-### 🗒 Topics — `/courses/:productId/topics`
+### Topics — `/courses/:productId/topics`
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
@@ -180,7 +225,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `DELETE` | `/courses/:productId/topics/:id` | Remove topic |
 | `PUT` | `/courses/:productId/topics/reorder` | Reorder topics |
 
-### ❓ Quizzes — `/courses/:productId/quizzes`
+### Quizzes — `/courses/:productId/quizzes`
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
@@ -199,7 +244,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `DELETE` | `/courses/:productId/quizzes/:quizId/questions/:questionId/options/:optionId` | Remove option |
 | `PUT` | `/courses/:productId/quizzes/:quizId/questions/:questionId/options/reorder` | Reorder options |
 
-### 🎬 Videos — `/videos`
+### Videos — `/videos`
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
@@ -218,7 +263,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `POST` | `/videos/:id/captions/:srclang` | Add caption/subtitle track |
 | `DELETE` | `/videos/:id/captions/:srclang` | Remove caption track |
 
-### 📝 Posts — `/posts`
+### Posts — `/posts`
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
@@ -230,7 +275,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `POST` | `/posts/:id/publish` | Publish post |
 | `POST` | `/posts/:id/unpublish` | Unpublish post |
 
-### 👥 Customer Management — `/customers` *(Admin role only)*
+### Customer Management — `/customers` *(Admin role only)*
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
@@ -244,7 +289,7 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `POST` | `/customers/:id/orders/:orderId/refund` | Issue full/partial refund |
 | `POST` | `/customers/:id/subscriptions/:subscriptionId/cancel` | Cancel subscription |
 
-### 💰 Subscription Plans — `/subscription-plans`
+### Subscription Plans — `/subscription-plans`
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
@@ -256,13 +301,13 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 | `POST` | `/subscription-plans/:id/unarchive` | Restore plan |
 | `POST` | `/subscription-plans/:id/sync-stripe` | Sync plan to Stripe |
 
-### � Products — `/products`
+### Products — `/products`
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
 | `GET` | `/products` | List all products. Query: `?content_type` |
 
-### 🏷 Categories & Tags
+### Categories & Tags
 
 | Method | Path | Description |
 | :--- | :--- | :--- |
@@ -271,36 +316,48 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 
 ---
 
-## 🗄 Database & Seeding
+## Environment Setup
 
 ```bash
-node scripts/seed-mock-data.js          # Seeds VidyaSetu mock courses, plans, quizzes
-node scripts/reset-admin-password.js   # Create/reset admin@vidyasetu.in → Admin@123456
-npm run migrate                         # Run pending SQL migrations
-npm run seed:plans                      # Seed subscription plans via ts-node
+cp .env.example .env
 ```
 
-> **Note:** Admin password must be ≥ 12 characters (enforced by bcrypt schema).
+Key variables in `.env`:
 
-## ⚙ Key Environment Variables
+| Variable | Description |
+| :--- | :--- |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `REDIS_URL` | Redis connection string (default: `redis://localhost:6379`) |
+| `PORT` | Server port (5000 main, 5001 admin, 5002 mobile) |
+| `CORS_ORIGIN` | Allowed frontend origin |
+| `FRONTEND_URL` | Frontend URL for OAuth redirects |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `AWS_ACCESS_KEY` | AWS credentials for SES email |
+| `AWS_SECRET_ACCESS_KEY` | AWS credentials for SES email |
 
-| Variable | Default | Description |
-| :--- | :--- | :--- |
-| `CORS_ORIGIN` | `http://localhost:3000` | Allowed origin for main-panel (frontend-Lms) |
-| `ADMIN_CORS_ORIGIN` | `http://localhost:3001` | Allowed origin for admin-Lms |
-| `ADMIN_PORT` | `5007` | Port for admin-panel backend |
-| `MOBILE_PORT` | `5002` | Port for mobile-api backend |
-| `DATABASE_URL` | — | PostgreSQL connection string |
-| `REDIS_URL` | `redis://localhost:6379` | Redis connection |
-| `STRIPE_SECRET_KEY` | — | Stripe secret for billing |
-| `GEMINI_API_KEY` | — | Google Gemini (AI Tutor) |
+See `.env.example` for the full list.
 
-## 🚀 Running Locally
+---
+
+## Database & Seeding
 
 ```bash
+npm run migrate                  # Run pending SQL migrations
+npm run seed:admin               # Create initial admin user
+npm run seed:plans               # Seed subscription plans
+node scripts/seed-mock-data.js   # Seeds VidyaSetu mock courses, plans, quizzes
+```
+
+---
+
+## Running Locally
+
+```bash
+npm install
 npm run dev          # Main panel (port 5000)
+npm run dev:admin    # Admin panel (port 5001)
 npm run dev:mobile   # Mobile API (port 5002)
-npm run dev:admin    # Admin panel (port 5007)
 npm run dev:all      # All three concurrently
 ```
 

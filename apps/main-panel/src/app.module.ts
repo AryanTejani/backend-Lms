@@ -13,6 +13,7 @@ import { CheckoutModule } from './modules/checkout/checkout.module';
 import { OnboardingModule } from './modules/onboarding/onboarding.module';
 import { AssistantModule } from './modules/assistant/assistant.module';
 import { TtsModule } from './modules/tts/tts.module';
+import { AccountModule } from './modules/account/account.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { TtsModule } from './modules/tts/tts.module';
     OnboardingModule,
     AssistantModule,
     TtsModule,
+    AccountModule,
   ],
 })
 export class MainPanelAppModule {}

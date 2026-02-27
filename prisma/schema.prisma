@@ -184,6 +184,7 @@ model Customer {
   subjects              Json                @default("[]")
   learningGoals         Json                @default("[]") @map("learning_goals")
   onboardingCompleted   Boolean             @default(false) @map("onboarding_completed")
+  avatarUrl             String?             @map("avatar_url") @db.VarChar(500)
 
   // Relations
   oauthAccounts        OAuthAccount[]

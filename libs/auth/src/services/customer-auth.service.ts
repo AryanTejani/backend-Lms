@@ -131,4 +131,27 @@ export class CustomerAuthService {
 
     return this.toAuthenticatedUser(customer);
   }
+
+  async changePassword(customerId: string, currentPassword: string, newPassword: string): Promise<void> {
+    const customer = await this.customerRepository.findById(customerId);
+
+    if (!customer || !customer.password_hash) {
+      throw Errors.accountNotFound();
+    }
+
+    const valid = await verifyPassword(currentPassword, customer.password_hash);
+
+    if (!valid) {
+      throw Errors.invalidCredentials();
+    }
+
+    if (currentPassword === newPassword) {
+      throw Errors.passwordSameAsOld();
+    }
+
+    const saltRounds = this.configService.get<number>('bcrypt.saltRounds') ?? 12;
+    const hashed = await hashPassword(newPassword, saltRounds);
+
+    await this.customerRepository.updatePassword(customerId, hashed);
+  }
 }

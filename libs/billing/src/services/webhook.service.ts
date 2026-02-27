@@ -54,6 +54,8 @@ export class WebhookService {
   }
 
   private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
+    this.logger.log(`checkout.session.completed: mode=${session.mode}, subscription=${session.subscription}, customer=${session.customer}`);
+
     if (session.mode === 'payment') {
       await this.handleOneTimePaymentCheckout(session);
 
@@ -61,10 +63,13 @@ export class WebhookService {
     }
 
     if (session.mode !== 'subscription' || !session.subscription) {
+      this.logger.log(`Skipping: mode=${session.mode}, subscription=${session.subscription}`);
+
       return;
     }
 
     const stripeSubscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription.id;
+    this.logger.log(`Checking idempotency for stripeSubscriptionId=${stripeSubscriptionId}`);
 
     // Idempotency: check if we already processed this subscription
     const existing = await this.subscriptionRepository.findByStripeSubscriptionId(stripeSubscriptionId);
@@ -78,6 +83,7 @@ export class WebhookService {
     // Get the full subscription from Stripe
     const stripeSubscription = await this.stripeService.retrieveSubscription(stripeSubscriptionId);
     const stripeCustomerId = typeof stripeSubscription.customer === 'string' ? stripeSubscription.customer : stripeSubscription.customer.id;
+    this.logger.log(`Retrieved subscription ${stripeSubscriptionId}, stripeCustomerId=${stripeCustomerId}`);
 
     // Find our customer by Stripe customer ID
     const customer = await this.prisma.customer.findFirst({
@@ -90,6 +96,8 @@ export class WebhookService {
       return;
     }
 
+    this.logger.log(`Found customer ${customer.id} for Stripe customer ${stripeCustomerId}`);
+
     // Get the price ID from the subscription item to find our plan
     const firstItem = stripeSubscription.items.data[0];
 
@@ -100,13 +108,17 @@ export class WebhookService {
     }
 
     const stripePriceId = firstItem.price.id;
+    this.logger.log(`First item priceId=${stripePriceId}, periodStart=${firstItem.current_period_start}, periodEnd=${firstItem.current_period_end}`);
     const plan = await this.subscriptionPlanRepository.findByStripePriceId(stripePriceId);
+    this.logger.log(`Plan lookup for priceId=${stripePriceId}: ${plan ? `found plan "${plan.name}" (${plan.id})` : 'NO PLAN FOUND'}`);
 
     const status = STRIPE_STATUS_MAP[stripeSubscription.status] ?? 'ACTIVE';
 
     // In the new API, current_period_start/end are on the subscription item, not the subscription
     const periodStart = firstItem.current_period_start;
     const periodEnd = firstItem.current_period_end;
+
+    this.logger.log(`Creating subscription: status=${status}, currency=${stripeSubscription.currency}, planId=${plan?.id ?? 'null'}`);
 
     // Create Subscription record, Purchase records, and increment customer count atomically
     const subscription = await this.prisma.$transaction(async (tx) => {

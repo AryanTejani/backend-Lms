@@ -4,6 +4,7 @@ export const createVideoSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
   category_id: z.string().uuid().optional(),
+  library_type: z.enum(['public', 'private']).default('private').optional(),
 });
 
 export const updateVideoSchema = z.object({
