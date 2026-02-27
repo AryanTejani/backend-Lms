@@ -10,7 +10,7 @@ import { chatRequestSchema, quizRequestSchema } from '../schemas/assistant.schem
 export class AssistantController {
   private readonly logger = new Logger(AssistantController.name);
 
-  constructor(private readonly assistantService: AssistantService) {}
+  constructor(private readonly assistantService: AssistantService) { }
 
   @Post('chat')
   async chat(@Body() body: unknown, @Res() res: Response): Promise<void> {
@@ -66,6 +66,20 @@ export class AssistantController {
       this.logger.error(`[POST /assistant/generate-quiz] Error: ${error instanceof Error ? error.message : String(error)}`);
 
       throw Errors.validationError('Failed to generate quiz. Please try again.');
+    }
+  }
+
+  @Post('translate')
+  async translate(@Body() body: { data: any; language: string }): Promise<any> {
+    if (!body.data || !body.language) {
+      throw Errors.validationError('Data and language are required');
+    }
+
+    try {
+      return await this.assistantService.translateJson(body.data, body.language);
+    } catch (error) {
+      this.logger.error(`[POST /assistant/translate] Error: ${error instanceof Error ? error.message : String(error)}`);
+      return body.data; // Fallback to original
     }
   }
 }
