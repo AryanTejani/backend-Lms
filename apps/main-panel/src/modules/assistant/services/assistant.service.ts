@@ -188,4 +188,34 @@ Requirements:
 
     return validated;
   }
+
+  async translateJson(data: any, language: string): Promise<any> {
+    if (language === 'en') return data;
+
+    const prompt = `You are a professional translator. Translate the following JSON content into the language with code: "${language}".
+Keep the JSON structure exactly as it is. Only translate the string values. Do not translate keys.
+
+JSON to translate:
+${JSON.stringify(data, null, 2)}`;
+
+    this.logger.log(`[translateJson] targetLang="${language}"`);
+
+    const response = await this.client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      config: {
+        systemInstruction: 'You are a technical translator. Preserve JSON structure and keys. Only translate values.',
+        responseMimeType: 'application/json',
+        temperature: 0.1,
+      },
+    });
+
+    const rawText = response.text ?? '{}';
+    try {
+      return JSON.parse(rawText);
+    } catch (e) {
+      this.logger.error(`[translateJson] Failed to parse AI response: ${rawText}`);
+      return data; // Fallback to original
+    }
+  }
 }

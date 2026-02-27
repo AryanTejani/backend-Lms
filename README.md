@@ -6,11 +6,11 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 
 ## 🏗 Ports & Apps
 
-| App | Port | Purpose |
-| :--- | :--- | :--- |
-| `apps/main-panel` | **5000** | Public student web API |
-| `apps/admin-panel` | **5001** | Instructor & admin management API |
-| `apps/mobile-api` | **5002** | Mobile app API (consumed via BFF on 5003) |
+| App | Port | Command | Purpose |
+| :--- | :--- | :--- | :--- |
+| `apps/main-panel` | **5000** | `npm run dev` | Public student web API |
+| `apps/mobile-api` | **5002** | `npm run dev:mobile` | Mobile app API (consumed via BFF on 5003) |
+| `apps/admin-panel` | **5007** | `npm run dev:admin` | Instructor & admin management API |
 
 ---
 
@@ -109,9 +109,13 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 
 ---
 
-## 🛡 Admin Panel API (Port 5001) — Admin & Instructor Management
+## 🛡 Admin Panel API (Port **5007**) — Admin & Instructor Management
 
-> Used by `admin-Lms`. All routes require `admin_session_id` cookie unless stated.
+> Used by `admin-Lms` (frontend on port **3001**). All routes require `admin_session_id` cookie.
+> 
+> **CORS**: Set `ADMIN_CORS_ORIGIN=http://localhost:3001` in `.env`
+> 
+> **Default Admin:** `admin@vidyasetu.in` / `Admin@123456`
 
 ### 🔑 Auth — `/auth`
 
@@ -267,36 +271,54 @@ NestJS monorepo powering the entire VidyaSetu platform. Three apps share a commo
 
 ---
 
-## 🚧 GAP ANALYSIS — Mobile App vs. What Exists
-
-These backend routes **exist and work** but the mobile app (`Arise`) doesn't use them yet:
-
-| Feature | Backend Endpoint | Status |
-| :--- | :--- | :--- |
-| Google OAuth login for mobile | `/auth/google` + `/auth/google/callback` | ❌ Not wired in app |
-| Password reset | `/auth/forgot-password` | ❌ Not in app |
-| Quizzes in course | `GET /courses/:slug/quizzes` & `/quizzes/:quizId` | ❌ Broken — app calls wrong BFF path |
-| Topics (sub-lessons) | `GET /courses/:slug/topics/:topicId` | ❌ Not in app |
-| Stripe billing portal | `POST /checkout/portal` | ❌ Not in BFF or app |
-| Course purchase (one-time) | `POST /billing/checkout/course-session` | ⚠️ BFF has it, app doesn't call it |
-| Video listing | `GET /videos` | ❌ Not in BFF or app |
-
----
-
 ## 🗄 Database & Seeding
 
 ```bash
-node scripts/seed-mock-data.js   # Seeds VidyaSetu mock courses, plans, quizzes
-npm run migrate                  # Run pending SQL migrations
-npm run seed:admin               # Create initial admin user
-npm run seed:plans               # Seed subscription plans
+node scripts/seed-mock-data.js          # Seeds VidyaSetu mock courses, plans, quizzes
+node scripts/reset-admin-password.js   # Create/reset admin@vidyasetu.in → Admin@123456
+npm run migrate                         # Run pending SQL migrations
+npm run seed:plans                      # Seed subscription plans via ts-node
 ```
+
+> **Note:** Admin password must be ≥ 12 characters (enforced by bcrypt schema).
+
+## ⚙ Key Environment Variables
+
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| `CORS_ORIGIN` | `http://localhost:3000` | Allowed origin for main-panel (frontend-Lms) |
+| `ADMIN_CORS_ORIGIN` | `http://localhost:3001` | Allowed origin for admin-Lms |
+| `ADMIN_PORT` | `5007` | Port for admin-panel backend |
+| `MOBILE_PORT` | `5002` | Port for mobile-api backend |
+| `DATABASE_URL` | — | PostgreSQL connection string |
+| `REDIS_URL` | `redis://localhost:6379` | Redis connection |
+| `STRIPE_SECRET_KEY` | — | Stripe secret for billing |
+| `GEMINI_API_KEY` | — | Google Gemini (AI Tutor) |
 
 ## 🚀 Running Locally
 
 ```bash
 npm run dev          # Main panel (port 5000)
 npm run dev:mobile   # Mobile API (port 5002)
-npm run dev:admin    # Admin panel (port 5001)
+npm run dev:admin    # Admin panel (port 5007)
 npm run dev:all      # All three concurrently
 ```
+
+## 🚧 GAP ANALYSIS — Mobile App Integration Status
+
+| Feature | Backend Endpoint | Status |
+| :--- | :--- | :--- |
+| Courses list + detail | `GET /courses`, `GET /courses/:slug` | ✅ Wired via BFF |
+| Lessons (video + text) | `GET /courses/:slug/lessons/:lessonId` | ✅ Wired via BFF |
+| Quizzes + Questions | `GET /courses/:slug/quizzes/:quizId` | ✅ Wired via BFF |
+| Topics (sub-lessons) | `GET /courses/:slug/topics/:topicId` | ✅ Wired via BFF |
+| Subscription plans | `GET /billing/plans` | ✅ Wired via BFF |
+| Course purchase | `POST /billing/checkout/course-session` | ✅ Wired via BFF |
+| Subscription checkout | `POST /billing/checkout/session` | ✅ Wired via BFF |
+| Subscription status | `GET /billing/subscription/status` | ✅ Wired via BFF |
+| Stripe billing portal | `POST /checkout/portal` | ✅ Wired via BFF |
+| Video listing | `GET /videos` | ✅ Wired via BFF |
+| Customer profile | `GET /customer/me` + `PATCH` | ✅ Wired via BFF |
+| Language preference | `PATCH /customer/preferences` | ✅ Wired via BFF |
+| Google OAuth (mobile) | `/auth/google` | ❌ Not implemented in app |
+| Password reset | `/auth/forgot-password` | ❌ Not in app |
