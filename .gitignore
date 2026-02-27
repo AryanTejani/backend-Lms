@@ -7,3 +7,6 @@ migrate-config.cjs
 prisma/migrations/
 
 /src/generated/prisma
+
+# Local file uploads (Bunny CDN fallback)
+uploads/

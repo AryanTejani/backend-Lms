@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { join } from 'node:path';
 
 function buildDatabaseUrl(): string {
   const user = process.env.DB_USER ?? 'postgres';
@@ -52,6 +53,15 @@ export interface SharedConfigShape {
   };
   logging: {
     dir: string;
+  };
+  storage: {
+    backendBaseUrl: string;
+    uploadsDir: string;
+  };
+  cloudinary: {
+    cloudName: string;
+    apiKey: string;
+    apiSecret: string;
   };
 }
 
@@ -114,5 +124,14 @@ export const sharedConfiguration = (): SharedConfigShape => ({
   },
   logging: {
     dir: process.env.LOG_DIR ?? '/var/www/app/tmp/traderlionApp',
+  },
+  storage: {
+    backendBaseUrl: process.env.BACKEND_BASE_URL ?? `http://localhost:${process.env.PORT ?? '5000'}`,
+    uploadsDir: process.env.UPLOADS_DIR ?? join(process.cwd(), 'uploads'),
+  },
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? '',
+    apiKey: process.env.CLOUDINARY_API_KEY ?? '',
+    apiSecret: process.env.CLOUDINARY_API_SECRET ?? '',
   },
 });

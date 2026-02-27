@@ -76,12 +76,13 @@ export class CheckoutController {
   @HttpCode(200)
   async handleStripeWebhook(@Req() req: Request): Promise<{ received: boolean }> {
     const signature = req.headers['stripe-signature'];
+    const rawBody = (req as Request & { rawBody?: Buffer }).rawBody;
+
+    this.logger.log(`[Webhook] hit — signature: ${!!signature}, rawBody: ${!!rawBody}, rawBodyLen: ${rawBody?.length}`);
 
     if (!signature || typeof signature !== 'string') {
       throw Errors.stripeWebhookInvalid();
     }
-
-    const rawBody = (req as Request & { rawBody?: Buffer }).rawBody;
 
     if (!rawBody) {
       throw Errors.stripeWebhookInvalid();
@@ -100,7 +101,7 @@ export class CheckoutController {
       await this.webhookService.handleEvent(event);
     } catch (error) {
       this.logger.error(`Error handling webhook event ${event.type}`, error);
-      // Return 200 to avoid Stripe retries for handler errors
+      throw error; // Don't swallow — let it 500 so Stripe CLI shows the failure
     }
 
     return { received: true };

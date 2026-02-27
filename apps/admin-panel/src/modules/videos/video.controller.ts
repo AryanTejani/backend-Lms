@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Put, Delete, Param, Query, Body, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Put, Delete, Param, Query, Body, UploadedFile, UseInterceptors, BadRequestException, Logger } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { VideoService, ZodValidationPipe } from '@app/shared';
 import type { BunnyVideo, BunnyStatusResponse, BunnyStreamLibrary } from '@app/shared';
@@ -11,6 +11,8 @@ import type { CreateVideoInput, UpdateVideoInput, FetchVideoInput, AddCaptionInp
 
 @Controller('videos')
 export class VideoController {
+  private readonly logger = new Logger(VideoController.name);
+
   constructor(
     private readonly videoContentService: VideoContentService,
     private readonly videoService: VideoService,
@@ -74,6 +76,7 @@ export class VideoController {
       title: body.title,
       description: body.description,
       categoryId: body.category_id,
+      libraryType: body.library_type,
     });
   }
 
@@ -111,7 +114,7 @@ export class VideoController {
   // ---- Bunny CDN direct operations (upload, reencode, thumbnail, fetch, captions) ----
 
   @Put(':id/upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 4 * 1024 * 1024 * 1024 } }))
   async upload(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
@@ -120,6 +123,12 @@ export class VideoController {
     if (!file) {
       throw new BadRequestException('No file provided');
     }
+
+    if (!file.buffer || file.buffer.length === 0) {
+      throw new BadRequestException('Uploaded file is empty');
+    }
+
+    this.logger.log(`Upload: ${file.originalname}, size=${file.buffer.length} bytes`);
 
     // Get the video to find bunny_video_id and library type
     const video = await this.videoContentService.getVideo(id);
