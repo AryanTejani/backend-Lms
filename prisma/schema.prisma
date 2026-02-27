@@ -336,6 +336,7 @@ model Product {
   createdByStaffId         String?             @map("created_by_staff_id") @db.Uuid
   instructorId             String?             @map("instructor_id") @db.Uuid
   wpPostId                 Int?                @map("wp_post_id")
+  language                 String              @default("en") @map("language") @db.VarChar(10)
   metadata                 Json?               @default("{}")
   createdAt                DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt                DateTime            @default(now()) @map("updated_at") @db.Timestamptz(6)
@@ -361,6 +362,7 @@ model Product {
   @@index([productSlug], map: "idx_products_slug")
   @@index([instructorId], map: "idx_products_instructor")
   @@index([wpPostId], map: "idx_products_wp_post_id")
+  @@index([language], map: "idx_products_language")
   @@map("products")
 }
 

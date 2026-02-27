@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { CourseProductService } from '@app/content/services/course-product.service';
 import { LessonService } from '@app/content/services/lesson.service';
 import { TopicService } from '@app/content/services/topic.service';
@@ -22,8 +22,8 @@ export class CourseController {
 
   @Get()
   @Public()
-  async list(): Promise<{ data: CourseProductRecord[]; total: number; page: number; limit: number }> {
-    return this.courseProductService.listCourses({ page: 1, limit: 100, isPublished: true });
+  async list(@Query('language') language?: string): Promise<{ data: CourseProductRecord[]; total: number; page: number; limit: number }> {
+    return this.courseProductService.listCourses({ page: 1, limit: 100, isPublished: true, language });
   }
 
   @Get(':slug')

@@ -18,6 +18,7 @@ export interface CourseProductRecord {
   thumbnail_url: string | null;
   amount_cents: number;
   currency: string;
+  language: string;
   content_type: string;
   instructor_id: string | null;
   is_published: boolean;
@@ -147,6 +148,7 @@ export class CourseProductService {
     limit: number;
     instructorId?: string | undefined;
     isPublished?: boolean | undefined;
+    language?: string | undefined;
   }): Promise<{ data: CourseProductRecord[]; total: number; page: number; limit: number }> {
     const skip = (params.page - 1) * params.limit;
     const where: Record<string, unknown> = { ...COURSE_WHERE };
@@ -157,6 +159,10 @@ export class CourseProductService {
 
     if (params.isPublished !== undefined) {
       where.isPublished = params.isPublished;
+    }
+
+    if (params.language) {
+      where.language = params.language;
     }
 
     const [products, total] = await Promise.all([
@@ -422,6 +428,7 @@ export class CourseProductService {
     thumbnailUrl: string | null;
     amountCents: bigint;
     currency: string;
+    language: string;
     contentType: string;
     instructorId: string | null;
     isPublished: boolean;
@@ -476,6 +483,7 @@ export class CourseProductService {
       thumbnail_url: product.thumbnailUrl,
       amount_cents: Number(product.amountCents),
       currency: product.currency,
+      language: product.language,
       content_type: CONTENT_TYPE_MAP[product.contentType] ?? 'course',
       instructor_id: product.instructorId,
       is_published: product.isPublished,

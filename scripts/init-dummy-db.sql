@@ -243,6 +243,7 @@ CREATE TABLE products (
   created_by_staff_id      uuid                 REFERENCES staff(id) ON DELETE SET NULL,
   instructor_id            uuid                 REFERENCES staff(id) ON DELETE SET NULL,
   wp_post_id               integer,
+  language                 varchar(10)          NOT NULL DEFAULT 'en',
   metadata                 jsonb                DEFAULT '{}',
   created_at               timestamptz          NOT NULL DEFAULT NOW(),
   updated_at               timestamptz          NOT NULL DEFAULT NOW(),
@@ -254,6 +255,7 @@ CREATE INDEX idx_products_instructor     ON products (instructor_id);
 CREATE INDEX idx_products_wp_post_id     ON products (wp_post_id);
 CREATE INDEX idx_products_stripe_product ON products (stripe_product_id) WHERE stripe_product_id IS NOT NULL;
 CREATE INDEX idx_products_stripe_price   ON products (stripe_price_id)   WHERE stripe_price_id   IS NOT NULL;
+CREATE INDEX idx_products_language       ON products (language);
 
 CREATE TABLE videos (
   id               uuid             PRIMARY KEY DEFAULT uuidv7(),
@@ -792,7 +794,7 @@ INSERT INTO subscription_plans (id, name, slug, description, amount_cents, curre
    '00000000-0000-0000-0000-000000000001', NOW(), NOW());
 
 -- 5. Products (4 courses)
-INSERT INTO products (id, product_name, product_slug, product_description, amount_cents, currency, content_type, is_published, published_at, sort_order, instructor_id, created_by_staff_id, created_at, updated_at) VALUES
+INSERT INTO products (id, product_name, product_slug, product_description, amount_cents, currency, content_type, is_published, published_at, sort_order, instructor_id, created_by_staff_id, language, created_at, updated_at) VALUES
   ('00000000-0000-0000-0004-000000000001',
    'Fractions & Decimals',
    'fractions-and-decimals',
@@ -800,7 +802,7 @@ INSERT INTO products (id, product_name, product_slug, product_description, amoun
    0, 'usd', 'course', true, NOW(), 1,
    '00000000-0000-0000-0000-000000000002',
    '00000000-0000-0000-0000-000000000001',
-   NOW(), NOW()),
+   'en', NOW(), NOW()),
 
   ('00000000-0000-0000-0004-000000000002',
    'Plants & Photosynthesis',
@@ -809,7 +811,7 @@ INSERT INTO products (id, product_name, product_slug, product_description, amoun
    0, 'usd', 'course', true, NOW(), 2,
    '00000000-0000-0000-0000-000000000003',
    '00000000-0000-0000-0000-000000000001',
-   NOW(), NOW()),
+   'en', NOW(), NOW()),
 
   ('00000000-0000-0000-0004-000000000003',
    'Reading & Comprehension',
@@ -818,7 +820,7 @@ INSERT INTO products (id, product_name, product_slug, product_description, amoun
    0, 'usd', 'course', true, NOW(), 3,
    '00000000-0000-0000-0000-000000000004',
    '00000000-0000-0000-0000-000000000001',
-   NOW(), NOW()),
+   'en', NOW(), NOW()),
 
   ('00000000-0000-0000-0004-000000000004',
    'History of India',
@@ -827,7 +829,7 @@ INSERT INTO products (id, product_name, product_slug, product_description, amoun
    0, 'usd', 'course', true, NOW(), 4,
    '00000000-0000-0000-0000-000000000005',
    '00000000-0000-0000-0000-000000000001',
-   NOW(), NOW());
+   'en', NOW(), NOW());
 
 -- 6. Subscription Plan Products (Standard + Premium × 4 products = 8 rows)
 INSERT INTO subscription_plan_products (id, plan_id, product_id, added_by_staff_id, created_at) VALUES
