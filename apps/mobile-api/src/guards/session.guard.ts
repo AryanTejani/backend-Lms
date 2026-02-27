@@ -33,8 +33,11 @@ export class SessionGuard implements CanActivate {
         const sessionId = this.extractSessionId(request);
 
         if (!sessionId) {
+            console.log('[SessionGuard] No session ID found in request');
             throw Errors.unauthorized();
         }
+
+        console.log(`[SessionGuard] Validating session: ${sessionId}`);
 
         const user = await this.customerAuthService.validateSession(sessionId);
 
@@ -59,8 +62,11 @@ export class SessionGuard implements CanActivate {
 
         // 2. Check Authorization header (standard for mobile apps)
         const authHeader = request.headers.authorization;
+        console.log(`[SessionGuard] Authorization header: ${authHeader}`);
         if (authHeader && authHeader.startsWith('Bearer ')) {
-            return authHeader.substring(7);
+            const token = authHeader.substring(7);
+            console.log(`[SessionGuard] Extracted token: ${token}`);
+            return token;
         }
 
         return undefined;
