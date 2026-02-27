@@ -14,7 +14,7 @@ interface AdminPanelConfigShape extends SharedConfigShape {
 export const configuration = (): AdminPanelConfigShape => ({
   ...sharedConfiguration(),
   server: {
-    port: parseInt(process.env.ADMIN_PORT ?? '5003', 10),
+    port: parseInt(process.env.ADMIN_PORT ?? '5007', 10),
     nodeEnv: process.env.NODE_ENV ?? 'development',
   },
   session: {

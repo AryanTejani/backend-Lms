@@ -19,13 +19,13 @@ export class CheckoutService {
     private readonly subscriptionPlanRepository: SubscriptionPlanRepository,
     private readonly subscriptionRepository: SubscriptionRepository,
     private readonly courseStripeSyncService: CourseStripeSyncService,
-  ) {}
+  ) { }
 
   async getActivePlans(): Promise<SubscriptionPlanRecord[]> {
     return this.subscriptionPlanRepository.findActive();
   }
 
-  async createCheckoutSession(customerId: string, priceId: string, promotionCode?: string): Promise<{ checkout_url: string }> {
+  async createCheckoutSession(customerId: string, priceId: string, promotionCode?: string, isMobile: boolean = false): Promise<{ checkout_url: string }> {
     const customer = await this.prisma.customer.findUnique({
       where: { id: customerId },
     });
@@ -55,8 +55,11 @@ export class CheckoutService {
     }
 
     const frontendUrl = (this.configService.get<string>('frontend.url') ?? 'http://localhost:3000').trim();
-    const successUrl = `${frontendUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${frontendUrl}/payment`;
+    const baseCallbackUrl = isMobile ? 'arise://' : frontendUrl;
+    const successUrl = isMobile
+      ? `${baseCallbackUrl}payment/success?session_id={CHECKOUT_SESSION_ID}`
+      : `${frontendUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = isMobile ? `${baseCallbackUrl}payment/cancel` : `${frontendUrl}/payment`;
 
     try {
       const session = await this.stripeService.createCheckoutSession({
@@ -112,6 +115,7 @@ export class CheckoutService {
     customerId: string,
     productId: string,
     promotionCode?: string,
+    isMobile: boolean = false,
   ): Promise<{ checkout_url: string }> {
     const product = await this.prisma.product.findUnique({ where: { id: productId } });
 
@@ -176,8 +180,12 @@ export class CheckoutService {
 
     const frontendUrl = (this.configService.get<string>('frontend.url') ?? 'http://localhost:3000').trim();
     const slug = encodeURIComponent(product.productSlug ?? product.id);
-    const successUrl = `${frontendUrl}/academy/${slug}?purchased=true`;
-    const cancelUrl = `${frontendUrl}/academy/${slug}`;
+    const baseCallbackUrl = isMobile ? 'arise://' : frontendUrl;
+
+    const successUrl = isMobile
+      ? `${baseCallbackUrl}academy/${slug}?purchased=true`
+      : `${frontendUrl}/academy/${slug}?purchased=true`;
+    const cancelUrl = isMobile ? `${baseCallbackUrl}academy/${slug}` : `${frontendUrl}/academy/${slug}`;
 
     try {
       const session = await this.stripeService.createOneTimeCheckoutSession({

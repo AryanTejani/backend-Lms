@@ -23,17 +23,17 @@ export class MobileBillingController {
     @Post('checkout/session')
     async createCheckoutSession(
         @CurrentUser() user: AuthenticatedUser,
-        @Body() body: { price_id: string; promotion_code?: string },
+        @Body() body: { price_id: string; promotion_code?: string; is_mobile?: boolean },
     ): Promise<{ checkout_url: string }> {
-        return this.checkoutService.createCheckoutSession(user.id, body.price_id, body.promotion_code);
+        return this.checkoutService.createCheckoutSession(user.id, body.price_id, body.promotion_code, body.is_mobile ?? true);
     }
 
     @Post('checkout/course-session')
     async createCourseCheckoutSession(
         @CurrentUser() user: AuthenticatedUser,
-        @Body() body: { product_id: string; promotion_code?: string },
+        @Body() body: { product_id: string; promotion_code?: string; is_mobile?: boolean },
     ): Promise<{ checkout_url: string }> {
-        return this.checkoutService.createCourseCheckoutSession(user.id, body.product_id, body.promotion_code);
+        return this.checkoutService.createCourseCheckoutSession(user.id, body.product_id, body.promotion_code, body.is_mobile ?? true);
     }
 
     @Get('subscription/status')

@@ -55,11 +55,11 @@ scripts/                   # Seed scripts
 
 ## Ports & Apps
 
-| App | Port | Purpose |
-| :--- | :--- | :--- |
-| `apps/main-panel` | **5000** | Public student web API |
-| `apps/admin-panel` | **5001** | Instructor & admin management API |
-| `apps/mobile-api` | **5002** | Mobile app API (consumed via BFF on 5003) |
+| App | Port | Command | Purpose |
+| :--- | :--- | :--- | :--- |
+| `apps/main-panel` | **5000** | `npm run dev` | Public student web API |
+| `apps/mobile-api` | **5002** | `npm run dev:mobile` | Mobile app API (consumed via BFF on 5003) |
+| `apps/admin-panel` | **5007** | `npm run dev:admin` | Instructor & admin management API |
 
 ---
 
@@ -360,3 +360,22 @@ npm run dev:admin    # Admin panel (port 5001)
 npm run dev:mobile   # Mobile API (port 5002)
 npm run dev:all      # All three concurrently
 ```
+
+## 🚧 GAP ANALYSIS — Mobile App Integration Status
+
+| Feature | Backend Endpoint | Status |
+| :--- | :--- | :--- |
+| Courses list + detail | `GET /courses`, `GET /courses/:slug` | ✅ Wired via BFF |
+| Lessons (video + text) | `GET /courses/:slug/lessons/:lessonId` | ✅ Wired via BFF |
+| Quizzes + Questions | `GET /courses/:slug/quizzes/:quizId` | ✅ Wired via BFF |
+| Topics (sub-lessons) | `GET /courses/:slug/topics/:topicId` | ✅ Wired via BFF |
+| Subscription plans | `GET /billing/plans` | ✅ Wired via BFF |
+| Course purchase | `POST /billing/checkout/course-session` | ✅ Wired via BFF |
+| Subscription checkout | `POST /billing/checkout/session` | ✅ Wired via BFF |
+| Subscription status | `GET /billing/subscription/status` | ✅ Wired via BFF |
+| Stripe billing portal | `POST /checkout/portal` | ✅ Wired via BFF |
+| Video listing | `GET /videos` | ✅ Wired via BFF |
+| Customer profile | `GET /customer/me` + `PATCH` | ✅ Wired via BFF |
+| Language preference | `PATCH /customer/preferences` | ✅ Wired via BFF |
+| Google OAuth (mobile) | `/auth/google` | ❌ Not implemented in app |
+| Password reset | `/auth/forgot-password` | ❌ Not in app |
